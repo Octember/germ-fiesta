@@ -20,6 +20,8 @@ var Player = function(startX, startY) {
 		} else if (keys.right) {
 			x += moveAmount;
 		};
+
+		// todo: fix diagonal movement bug
 	};
 
 	var draw = function(ctx) {
