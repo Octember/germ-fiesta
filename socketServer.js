@@ -38,7 +38,12 @@ function onClientDisconnect() {
         return;
     };
 
-    delete players[this.id]
+    util.log("Client IDs: ");
+    util.log(Object.keys(players));
+
+    delete players[this.id];
+
+    util.log("Broadcasting 'remove player'")
 
     this.broadcast.emit("remove player", {id: this.id});
 };

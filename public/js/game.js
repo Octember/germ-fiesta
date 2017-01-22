@@ -155,7 +155,7 @@ function onMovePlayer(data) {
     var movedPlayer = remotePlayers[data.id];
 
     if (!movedPlayer) {
-        util.log("Player not found: " + this.id);
+        console.log("Player not found: " + this.id);
         return;
     };
 
@@ -168,9 +168,9 @@ function onRemovePlayer(data) {
     var removePlayer = remotePlayers[data.id]
 
     if (!removePlayer) {
-        util.log("Player not found: " + this.id);
+        console.log("Player not found: " + data.id);
         return;
     };
 
-    delete remotePlayers[this.id]
+    delete remotePlayers[data.id]
 };
