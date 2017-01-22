@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    //- h1= title
+    //- p Welcome to #{title}
+
+
+    body
+        canvas#gameCanvas
+        script(src="http://localhost:8000/socket.io/socket.io.js")
+        script(src="javascripts/requestAnimationFrame.js")
+        script(src="javascripts/Keys.js")
+        script(src="javascripts/Player.js")
+        script(src="javascripts/game.js")
+
+        script(type='text/javascript').
+            init()
+            animate()
