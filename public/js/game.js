@@ -101,7 +101,12 @@ function animate() {
 ** GAME UPDATE
 **************************************************/
 function update() {
-    localPlayer.update(keys);
+    var updated = localPlayer.update(keys);
+
+    if (updated) {
+        console.log("I'm moving!!")
+        socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
+    }
 };
 
 
@@ -145,7 +150,18 @@ function onNewPlayer(data) {
 };
 
 function onMovePlayer(data) {
+    console.log("Player moved: " + data.id);
 
+    var movedPlayer = remotePlayers[data.id];
+
+    if (!movedPlayer) {
+        util.log("Player not found: " + this.id);
+        return;
+    };
+
+    // We probably trust the server, right?
+    movedPlayer.setX(data.x);
+    movedPlayer.setY(data.y);
 };
 
 function onRemovePlayer(data) {
@@ -156,5 +172,5 @@ function onRemovePlayer(data) {
         return;
     };
 
-    delete players[this.id]
+    delete remotePlayers[this.id]
 };
