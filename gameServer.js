@@ -1,4 +1,4 @@
-// todo
+// For handling user events
 
 var util = require("util"),
     io = require("socket.io"),
