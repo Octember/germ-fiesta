@@ -58,5 +58,16 @@ app.use(function(err, req, res, next) {
   });
 });
 
+var env = process.env.NODE_ENV || 'development';
+
+if (env == 'development') {
+  app.locals.URLs = {
+    socketURL: 'http://localhost:8000',
+  }
+} else {
+  app.locals.URLs = {
+    socketURL: 'http://35.167.229.55:8000',
+  }
+}
 
 module.exports = app;
