@@ -38,7 +38,7 @@ function init() {
 
 
     // Init the socket
-    socket = io.connect("http://localhost:8000");
+    socket = io.connect("http://" + document.location.hostname + ":8000");
 
     // Start listening for events
     setEventHandlers();
