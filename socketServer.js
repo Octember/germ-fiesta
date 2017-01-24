@@ -1,11 +1,11 @@
-// For handling user events
+var util = require("util");
+var socketio = require("socket.io");
+var Player = require("./Player").Player;
 
-var util = require("util"),
-    socketio = require("socket.io"),
-    Player = require("./Player").Player;
-
-var io,
-    players;
+// The reference to sockio, on port 8000. This is a socketio standard
+var io;
+// The players in the room
+var players;
 
 function init() {
     players = {};
@@ -65,10 +65,7 @@ function onNewPlayer(data) {
     players[newPlayer.id] = newPlayer;
 };
 
-// TODO: consider making a finite number of moves per a certain amount of time.
-// In that case, we would not emit events like this per every user move.
-// Instead - queue up player moves per timeframe, execute them all (race conditions?)
-// and notify all players the changed state of the game
+// TODO: queue up player moves per timeframe, execute them all (race conditions?)
 function onMovePlayer(data) {
     var movedPlayer = players[this.id];
 
@@ -84,7 +81,7 @@ function onMovePlayer(data) {
     movedPlayer.setX(data.x);
     movedPlayer.setY(data.y);
 
-    // Tell everyone that he moved, lol
+    // Tell everyone that he moved, in real time
     // this.broadcast.emit("move player", {id: movedPlayer.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
 };
 

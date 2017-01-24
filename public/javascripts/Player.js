@@ -1,3 +1,6 @@
+const PLAYER_SIZE = 20;
+const COLOR_CHOICES
+
 /**************************************************
 ** GAME PLAYER CLASS
 **************************************************/
@@ -47,7 +50,7 @@ var Player = function(startX, startY) {
     };
 
     var draw = function(ctx) {
-        ctx.fillRect(x-5, y-5, 10, 10);
+        ctx.fillRect(x - (PLAYER_SIZE / 2), y - (PLAYER_SIZE / 2), PLAYER_SIZE, PLAYER_SIZE);
     };
 
     return {
