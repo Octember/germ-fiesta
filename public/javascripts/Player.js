@@ -9,6 +9,8 @@ var Player = function(startX, startY) {
         id,
         moveAmount = 2;
 
+    var path; // used by paperJS to draw it... this doesn't belong here
+
     var update = function(keys) {
         var prevX = x,
         prevY = y;

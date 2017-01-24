@@ -17,11 +17,11 @@ var path;
 function init() {
     // Declare the canvas and rendering context
     canvas = document.getElementById("gameCanvas");
-    ctx = canvas.getContext("2d");
 
     // Create an empty project and a view for the canvas:
     paper.setup(canvas);
 
+    paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
 
     path = new paper.Path.Rectangle({
         point: [75, 75],
@@ -32,14 +32,10 @@ function init() {
     paper.view.onFrame = function(event) {
         console.log("onFrame (new way!) called");
         // Your animation code goes in here
-        path.rotate(3);
+        // path.rotate(3);
+
+        update();
     }
-
-    paper.view.draw();
-
-    // Maximise the canvas
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 
     // Initialise keyboard controls
     keys = new Keys();
@@ -52,6 +48,9 @@ function init() {
 
     // Initialise the local player
     localPlayer = new Player(startX, startY);
+    localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 50);
+    localPlayer.path.fillColor = 'black';
+    localPlayer.path.selected = true;
 
     // No remote players to begin with? What about existing players..
     remotePlayers = {};
@@ -62,6 +61,9 @@ function init() {
 
     // Start listening for events
     setEventHandlers();
+
+    paper.view.draw();
+
 };
 
 
@@ -73,8 +75,6 @@ var setEventHandlers = function() {
     window.addEventListener("keydown", onKeydown, false);
     window.addEventListener("keyup", onKeyup, false);
 
-    // Window resize
-    window.addEventListener("resize", onResize, false);
 
     socket.on("connect", onSocketConnected);
     socket.on("disconnect", onSocketDisconnect);
@@ -97,24 +97,12 @@ function onKeyup(e) {
     };
 };
 
-// Browser window resize
-function onResize(e) {
-    // Maximise the canvas
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-};
 
 /**************************************************
 ** GAME ANIMATION LOOP
 **************************************************/
 function animate() {
-    console.log("animate ( old way) called")
-
     update();
-    draw();
-
-    // Request a new animation frame using Paul Irish's shim
-    // window.requestAnimFrame(animate);
 };
 
 /**************************************************
@@ -123,27 +111,11 @@ function animate() {
 function update() {
     var updated = localPlayer.update(keys);
 
+    localPlayer.path.setPosition([localPlayer.getX(), localPlayer.getY()])
+
     if (updated) {
         socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
     }
-};
-
-
-/**************************************************
-** GAME DRAW
-**************************************************/
-function draw() {
-    // Wipe the canvas clean
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the local player
-    localPlayer.draw(ctx);
-
-    // Draw remote players
-    var id;
-    for (id in remotePlayers) {
-        remotePlayers[id].draw(ctx);
-    };
 };
 
 
@@ -156,8 +128,8 @@ function onSocketConnected() {
 function onSocketDisconnect() {
     console.log("Disconnected from socket server");
 
-
 };
+
 
 function onNewPlayer(data) {
     // console.log("New player connected: " + data.id);

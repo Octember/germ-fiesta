@@ -92,8 +92,10 @@ function notifyPlayersMoved() {
     // Loop through players and broadcast their positions
     Object.keys(players).forEach(function(id) {
         var player = players[id];
-
-        io.sockets.emit('move player', {id: id, x: player.getX(), y: player.getY()});
+        // don't know why this would happen, but it does
+        if (player) {
+            io.sockets.emit('move player', {id: id, x: player.getX(), y: player.getY()});
+        }
     });
 
 }
