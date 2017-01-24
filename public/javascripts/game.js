@@ -8,7 +8,6 @@ var canvas,         // Canvas DOM element
     remotePlayers,  // Remote players
     socket;         // socket.io reference
 
-var path;
 
 
 /**************************************************
@@ -23,17 +22,8 @@ function init() {
 
     paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
 
-    path = new paper.Path.Rectangle({
-        point: [75, 75],
-        size: [75, 75],
-        strokeColor: 'black'
-    });
-
     paper.view.onFrame = function(event) {
         console.log("onFrame (new way!) called");
-        // Your animation code goes in here
-        // path.rotate(3);
-
         update();
     }
 
@@ -43,13 +33,13 @@ function init() {
     // Calculate a random start position for the local player
     // The minus 5 (half a player size) stops the player being
     // placed right on the egde of the screen
-    var startX = Math.round(Math.random()*(canvas.width-5)),
-        startY = Math.round(Math.random()*(canvas.height-5));
+    var startX = Math.round(Math.random()*(paper.view.viewSize.width-5)),
+        startY = Math.round(Math.random()*(paper.view.viewSize.height-5));
 
     // Initialise the local player
     localPlayer = new Player(startX, startY);
-    localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 50);
-    localPlayer.path.fillColor = 'black';
+    localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
+    localPlayer.path.fillColor = 'green';
     localPlayer.path.selected = true;
 
     // No remote players to begin with? What about existing players..
@@ -137,6 +127,9 @@ function onNewPlayer(data) {
     var newPlayer = new Player(data.x, data.y);
     newPlayer.id = data.id;
 
+    newPlayer.path = new paper.Path.Circle(new paper.Point(newPlayer.getX(), newPlayer.getY()), 30);
+    newPlayer.path.fillColor = 'black';
+
     remotePlayers[newPlayer.id] = newPlayer;
 };
 
@@ -154,6 +147,9 @@ function onMovePlayer(data) {
     // We probably trust the server, right?
     movedPlayer.setX(data.x);
     movedPlayer.setY(data.y);
+
+    // Why doesn't this work?
+    movedPlayer.path.setPostion([data.x, data.y]);
 };
 
 function onRemovePlayer(data) {

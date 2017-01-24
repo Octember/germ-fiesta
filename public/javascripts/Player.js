@@ -60,6 +60,7 @@ var Player = function(startX, startY) {
         getX: getX,
         getY: getY,
         setX: setX,
-        setY: setY
+        setY: setY,
+        path: path // yuck
     }
 };
