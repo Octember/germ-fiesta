@@ -1,22 +1,22 @@
 // For handling user events
 
 var util = require("util"),
-    io = require("socket.io"),
+    socketio = require("socket.io"),
     Player = require("./Player").Player;
 
-var socket,
+var io,
     players;
 
 function init() {
     players = {};
 
-    socket = io.listen(8000);
+    io = socketio(8000);
 
     setEventHandlers();
 };
 
 var setEventHandlers = function() {
-    socket.sockets.on("connection", onSocketConnection);
+    io.sockets.on("connection", onSocketConnection);
 };
 
 
@@ -85,8 +85,25 @@ function onMovePlayer(data) {
     movedPlayer.setY(data.y);
 
     // Tell everyone that he moved, lol
-    this.broadcast.emit("move player", {id: movedPlayer.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
+    // this.broadcast.emit("move player", {id: movedPlayer.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
 };
 
 
+// Alternative to alerting constantly
+function notifyPlayersMoved() {
+
+    // Loop thru players and broadcast players positions
+    Object.keys(players).forEach(function(id) {
+        var player = players[id];
+
+        io.sockets.emit('move player', {id: player.id, x: player.getX(), y: player.getY()});
+    });
+
+
+
+}
+
 init();
+
+// every half second, update player positions
+setInterval(notifyPlayersMoved, 1000 / 30);
