@@ -81,7 +81,7 @@ function onMovePlayer(data) {
     movedPlayer.setX(data.x);
     movedPlayer.setY(data.y);
 
-    // Tell everyone that he moved, in real time
+    // Tell everyone that he moved in real time
     // this.broadcast.emit("move player", {id: this.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
 };
 
@@ -89,7 +89,7 @@ function onMovePlayer(data) {
 // Alternative to alerting constantly
 function notifyPlayersMoved() {
 
-    // Loop thru players and broadcast players positions
+    // Loop through players and broadcast their positions
     Object.keys(players).forEach(function(id) {
         var player = players[id];
 

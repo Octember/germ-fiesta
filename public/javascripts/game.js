@@ -29,6 +29,13 @@ function init() {
         strokeColor: 'black'
     });
 
+    paper.view.onFrame = function(event) {
+        console.log("onFrame (new way!) called");
+        // Your animation code goes in here
+        path.rotate(3);
+    }
+
+    paper.view.draw();
 
     // Maximise the canvas
     canvas.width = window.innerWidth;
@@ -101,34 +108,25 @@ function onResize(e) {
 ** GAME ANIMATION LOOP
 **************************************************/
 function animate() {
+    console.log("animate ( old way) called")
+
     update();
     draw();
 
     // Request a new animation frame using Paul Irish's shim
-    window.requestAnimFrame(animate);
+    // window.requestAnimFrame(animate);
 };
-
 
 /**************************************************
 ** GAME UPDATE
 **************************************************/
 function update() {
     var updated = localPlayer.update(keys);
-    console.log("update called")
 
     if (updated) {
         socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
     }
 };
-
-
-
-function onFrame(event) {
-    console.log("onFrame called");
-    // Your animation code goes in here
-    path.rotate(3);
-}
-
 
 
 /**************************************************
@@ -176,7 +174,8 @@ function onMovePlayer(data) {
     var movedPlayer = remotePlayers[data.id];
 
     if (!movedPlayer) {
-        console.log("Player not found: " + this.id);
+        // Commenting this out because it's noisy, but this should never happen
+        // console.log("Player not found: " + this.id);
         return;
     };
 
