@@ -99,8 +99,6 @@ function notifyPlayersMoved() {
         io.sockets.emit('move player', {id: player.id, x: player.getX(), y: player.getY()});
     });
 
-
-
 }
 
 init();
