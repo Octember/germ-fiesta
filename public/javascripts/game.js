@@ -8,6 +8,8 @@ var canvas,         // Canvas DOM element
     remotePlayers,  // Remote players
     socket;         // socket.io reference
 
+var path;
+
 
 /**************************************************
 ** GAME INITIALIZATION
@@ -16,6 +18,17 @@ function init() {
     // Declare the canvas and rendering context
     canvas = document.getElementById("gameCanvas");
     ctx = canvas.getContext("2d");
+
+    // Create an empty project and a view for the canvas:
+    paper.setup(canvas);
+
+
+    path = new paper.Path.Rectangle({
+        point: [75, 75],
+        size: [75, 75],
+        strokeColor: 'black'
+    });
+
 
     // Maximise the canvas
     canvas.width = window.innerWidth;
@@ -84,7 +97,6 @@ function onResize(e) {
     canvas.height = window.innerHeight;
 };
 
-
 /**************************************************
 ** GAME ANIMATION LOOP
 **************************************************/
@@ -102,12 +114,21 @@ function animate() {
 **************************************************/
 function update() {
     var updated = localPlayer.update(keys);
+    console.log("update called")
 
     if (updated) {
-        console.log("I'm moving!!")
         socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
     }
 };
+
+
+
+function onFrame(event) {
+    console.log("onFrame called");
+    // Your animation code goes in here
+    path.rotate(3);
+}
+
 
 
 /**************************************************
@@ -141,7 +162,7 @@ function onSocketDisconnect() {
 };
 
 function onNewPlayer(data) {
-    console.log("New player connected: " + data.id);
+    // console.log("New player connected: " + data.id);
 
     var newPlayer = new Player(data.x, data.y);
     newPlayer.id = data.id;
@@ -150,7 +171,7 @@ function onNewPlayer(data) {
 };
 
 function onMovePlayer(data) {
-    console.log("Player moved: " + data.id);
+    // console.log("Player moved: " + data.id);
 
     var movedPlayer = remotePlayers[data.id];
 
