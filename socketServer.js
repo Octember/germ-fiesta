@@ -82,7 +82,7 @@ function onMovePlayer(data) {
     movedPlayer.setY(data.y);
 
     // Tell everyone that he moved, in real time
-    // this.broadcast.emit("move player", {id: movedPlayer.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
+    // this.broadcast.emit("move player", {id: this.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
 };
 
 
@@ -93,7 +93,7 @@ function notifyPlayersMoved() {
     Object.keys(players).forEach(function(id) {
         var player = players[id];
 
-        io.sockets.emit('move player', {id: player.id, x: player.getX(), y: player.getY()});
+        io.sockets.emit('move player', {id: id, x: player.getX(), y: player.getY()});
     });
 
 }
