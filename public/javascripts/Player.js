@@ -1,5 +1,4 @@
 const PLAYER_SIZE = 20;
-const COLOR_CHOICES
 
 /**************************************************
 ** GAME PLAYER CLASS
