@@ -2,10 +2,8 @@ var util = require("util");
 var socketio = require("socket.io");
 var Player = require("./Player").Player;
 
-// The reference to sockio, on port 8000. This is a socketio standard
-var io;
-// The players in the room
-var players;
+var io; // The reference to sockio, on port 8000. This is a socketio standard
+var players; // The players in the room
 
 function init() {
     players = {};
@@ -74,7 +72,7 @@ function onMovePlayer(data) {
         return;
     };
 
-    util.log("Player moved " + this.id);
+    // util.log("Player moved " + this.id);
 
     // TODO: Do we trust the client?
     // Could cheat by passing bogus data, also these should be sanitized
@@ -97,7 +95,6 @@ function notifyPlayersMoved() {
             io.sockets.emit('move player', {id: id, x: player.getX(), y: player.getY()});
         }
     });
-
 }
 
 init();

@@ -17,16 +17,16 @@ var Player = function(startX, startY, color) {
         prevY = y;
 
         // Up key takes priority over down
-        if (keys.up) {
+        if (paper.Key.isDown('up')) {
             y -= moveAmount;
-        } else if (keys.down) {
+        } else if (paper.Key.isDown('down')) {
             y += moveAmount;
         };
 
         // Left key takes priority over right
-        if (keys.left) {
+        if (paper.Key.isDown('left')) {
             x -= moveAmount;
-        } else if (keys.right) {
+        } else if (paper.Key.isDown('right')) {
             x += moveAmount;
         };
 

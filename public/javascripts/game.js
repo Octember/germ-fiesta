@@ -26,9 +26,6 @@ function init() {
         update();
     }
 
-    // Initialise keyboard controls
-    keys = new Keys();
-
     // Calculate a random start position for the local player
     // The minus 5 (half a player size) stops the player being
     // placed right on the egde of the screen
@@ -56,32 +53,12 @@ function init() {
 ** GAME EVENT HANDLERS
 **************************************************/
 var setEventHandlers = function() {
-    // Keyboard
-    window.addEventListener("keydown", onKeydown, false);
-    window.addEventListener("keyup", onKeyup, false);
-
-
     socket.on("connect", onSocketConnected);
     socket.on("disconnect", onSocketDisconnect);
     socket.on("new player", onNewPlayer);
     socket.on("move player", onMovePlayer);
     socket.on("remove player", onRemovePlayer);
 };
-
-// Keyboard key down
-function onKeydown(e) {
-    if (localPlayer) {
-        keys.onKeyDown(e);
-    };
-};
-
-// Keyboard key up
-function onKeyup(e) {
-    if (localPlayer) {
-        keys.onKeyUp(e);
-    };
-};
-
 
 /**************************************************
 ** GAME UPDATE
