@@ -36,7 +36,7 @@ function init() {
     // Initialise the local player
     localPlayer   = new Player(startX, startY, 'green');
     remotePlayers = {};
-    cells         = [];
+    cells         = {};
 
     // Init the connection to socket.io
     socket = io.connect("http://" + document.location.hostname + ":8000");
@@ -153,11 +153,25 @@ function onRemovePlayer(data) {
 
 
 function onNewCell(data) {
+    cells[data.id] = createCell(data);
+}
 
+
+function createCell(data) {
     var path = new paper.Path.Circle(new paper.Point(data.x, data.y), data.size);
     path.strokeColor = 'black';
 
-    var cell = new Cell.Cell(data.x, data.y, data.size, path);
+    var text = new paper.PointText({
+        point: path.position,
+        content: '0',
+        justification: 'center',
+        fontSize: 15
+    });
 
-    cells.push(cell);
+    return new Cell.Cell(data.id, data.x, data.y, data.size, path);
+};
+
+
+function updateCell(data) {
+
 }

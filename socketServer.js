@@ -1,13 +1,14 @@
 var util = require("util");
 var socketio = require("socket.io");
 var Player = require("./Player").Player;
-debugger;
 var Cell = require("./common/model/Cell").Cell;
+var guid = require("./utility").guid;
 
 var io; // The reference to sockio, on port 8000. This is a socketio standard
-var players; // The players in the room
 
+var players; // The players in the room
 var cells;
+
 
 function init() {
     players = {};
@@ -16,7 +17,7 @@ function init() {
     var i;
     for (i = 0; i < 3; i++) {
         // Random-ish positions and sizes
-        var cell = new Cell(100 + (i * 100), 100 + (i * 100), 20 + (i * 20));
+        var cell = new Cell(guid(), 100 + (i * 100), 100 + (i * 100), 20 + (i * 20));
         cells.push(cell);
     }
 
@@ -24,6 +25,7 @@ function init() {
 
     setEventHandlers();
 };
+
 
 var setEventHandlers = function() {
     io.sockets.on("connection", onSocketConnection);
@@ -36,6 +38,7 @@ function onSocketConnection(client) {
     client.on("move player", onMovePlayer);
     client.on("disconnect", onClientDisconnect);
 };
+
 
 function onNewPlayer(data) {
     var newPlayer = new Player(data.x, data.y);
@@ -51,6 +54,7 @@ function onNewPlayer(data) {
         this.emit("new player", {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
     };
 
+    // tell him about the cells
     var i, cell;
     for (i = 0; i < cells.length; i++) {
         cell = cells[i];

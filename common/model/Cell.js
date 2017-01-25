@@ -1,10 +1,11 @@
 (function(exports) {
 
-    var Cell = function(startX, startY, radius, paperPath) {
-        var x = startX,
-            y = startY,
-            radius = radius,
-            id; // assigned manually
+    var Cell = function(id, startX, startY, radius, paperPath) {
+        var x = startX;
+        var y = startY;
+        var radius = radius;
+        var count = 0;
+        var id = id;
 
         var path;
 
