@@ -58,7 +58,7 @@ function onNewPlayer(data) {
     var i, cell;
     for (i = 0; i < cells.length; i++) {
         cell = cells[i];
-        this.emit("new cell", {x: cell.getX(), y: cell.getY(), size: cell.getRadius()})
+        this.emit("new cell", {x: cell.getX(), y: cell.getY(), radius: cell.getRadius(), size: 0})
     }
 
     players[newPlayer.id] = newPlayer;
@@ -106,6 +106,10 @@ function onClientDisconnect() {
     this.broadcast.emit("remove player", {id: this.id});
 };
 
+
+
+
+
 // Alternative to alerting constantly
 function notifyPlayersMoved() {
 
@@ -119,7 +123,17 @@ function notifyPlayersMoved() {
     });
 }
 
+function updateCells() {
+
+}
+
+function update() {
+    notifyPlayersMoved();
+
+    updateCells();
+}
+
 init();
 
 // every (1000 / 30) ms, update player positions
-setInterval(notifyPlayersMoved, 1000 / 30);
+setInterval(update, 1000 / 30);

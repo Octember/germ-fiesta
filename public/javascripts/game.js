@@ -158,20 +158,20 @@ function onNewCell(data) {
 
 
 function createCell(data) {
-    var path = new paper.Path.Circle(new paper.Point(data.x, data.y), data.size);
-    path.strokeColor = 'black';
+    var drawing = new paper.Path.Circle(new paper.Point(data.x, data.y), data.radius);
+    drawing.strokeColor = 'black';
 
     var text = new paper.PointText({
-        point: path.position,
-        content: '0',
+        point: drawing.position,
+        content: data.size,
         justification: 'center',
         fontSize: 15
     });
 
-    return new Cell.Cell(data.id, data.x, data.y, data.size, path);
+    return new Cell.Cell(data.id, data.x, data.y, data.radius, drawing, text);
 };
 
 
 function updateCell(data) {
-
+    cells[data.id].text.content = data.size;
 }
