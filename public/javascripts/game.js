@@ -61,6 +61,7 @@ var setEventHandlers = function() {
     socket.on("remove player", onRemovePlayer);
 
     socket.on("new cell", onNewCell);
+    socket.on("update cell", onUpdateCell)
 
 };
 
@@ -172,6 +173,11 @@ function createCell(data) {
 };
 
 
-function updateCell(data) {
-    cells[data.id].text.content = data.size;
+function onUpdateCell(data) {
+    var cell = cells[data.id]
+
+    console.log("Updating size to " + data.size)
+    if (cell) {
+        cell.getText().content = data.size;
+    }
 }

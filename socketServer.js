@@ -125,6 +125,14 @@ function notifyPlayersMoved() {
 
 function updateCells() {
 
+    var i = 0;
+    for (i = 0; i < cells.length; i++) {
+        var cell = cells[i];
+        cell.setSize(cell.getSize() + 1)
+
+        io.sockets.emit('update cell', {id: cell.id, size: cell.getSize()})
+    }
+
 }
 
 function update() {

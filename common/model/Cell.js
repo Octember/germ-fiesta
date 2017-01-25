@@ -1,14 +1,19 @@
 (function(exports) {
 
-    var Cell = function(id, startX, startY, radius, paperPath, textPath) {
+    var Cell = function(id, startX, startY, radius, size, paperPath, textPath) {
         var x = startX;
         var y = startY;
         var radius = radius;
-        var count = 0;
         var id = id;
+
+        var size = 0;
 
         var path;
         var text;
+
+        if (size !== undefined) {
+            size = size;
+        }
 
         if (paperPath !== undefined) {
             path = paperPath;
@@ -30,6 +35,14 @@
             return radius;
         }
 
+        var getSize = function() {
+            return size;
+        }
+
+        var getText = function() {
+            return text;
+        }
+
         var setX = function(newX) {
             x = newX;
         };
@@ -38,13 +51,21 @@
             y = newY;
         };
 
+        var setSize = function(newSize) {
+            size = newSize;
+        };
+
+
         return {
             getX: getX,
             getY: getY,
             setX: setX,
             setY: setY,
+            getSize: getSize,
             getRadius: getRadius,
-            id: id
+            id: id,
+            getText: getText,
+            setSize: setSize
         }
     };
 
