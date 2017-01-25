@@ -43,31 +43,23 @@ var Player = function(startX, startY, color) {
         return y;
     };
 
-    var setX = function(newX) {
-        x = newX;
-    };
-
-    var setY = function(newY) {
-        y = newY;
-    };
-
     var setPosition = function(newX, newY) {
-        setX(newX);
-        setY(newY);
+        x = newX;
+        y = newY;
         path.setPosition([newX, newY]);
     }
 
-    var draw = function(ctx) {
-        ctx.fillRect(x - (PLAYER_SIZE / 2), y - (PLAYER_SIZE / 2), PLAYER_SIZE, PLAYER_SIZE);
-    };
+
+    // Helper method to destroy the paperjs "path" object
+    var destroy = function() {
+        path.remove()
+    }
 
     return {
         update: update,
-        draw: draw,
         getX: getX,
         getY: getY,
-        setX: setX,
-        setY: setY,
-        setPosition: setPosition // yuck
+        setPosition: setPosition,
+        destroy: destroy
     }
 };

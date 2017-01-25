@@ -37,15 +37,11 @@ function init() {
 
     // Initialise the local player
     localPlayer = new Player(startX, startY, 'green');
-    // localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
-    // localPlayer.path.fillColor = 'green';
-    // localPlayer.path.selected = true;
 
-    // No remote players to begin with? What about existing players..
+    // Other players
     remotePlayers = {};
 
-
-    // Init the socket
+    // Init the connection to socket.io
     socket = io.connect("http://" + document.location.hostname + ":8000");
 
     // Start listening for events
@@ -88,13 +84,6 @@ function onKeyup(e) {
 
 
 /**************************************************
-** GAME ANIMATION LOOP
-**************************************************/
-function animate() {
-    update();
-};
-
-/**************************************************
 ** GAME UPDATE
 **************************************************/
 function update() {
@@ -114,9 +103,9 @@ function onSocketConnected() {
     socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY()});
 };
 
+
 function onSocketDisconnect() {
     console.log("Disconnected from socket server");
-
 };
 
 
@@ -126,10 +115,9 @@ function onNewPlayer(data) {
     var newPlayer = new Player(data.x, data.y, 'black');
     newPlayer.id = data.id;
 
-
-
     remotePlayers[newPlayer.id] = newPlayer;
 };
+
 
 function onMovePlayer(data) {
     // console.log("Player moved: " + data.id);
@@ -146,7 +134,9 @@ function onMovePlayer(data) {
     movedPlayer.setPosition(data.x, data.y);
 };
 
+
 function onRemovePlayer(data) {
+    console.log("supposed to remove player now " + Object.keys(remotePlayers).length);
     var removePlayer = remotePlayers[data.id]
 
     if (!removePlayer) {
@@ -154,5 +144,10 @@ function onRemovePlayer(data) {
         return;
     };
 
-    delete remotePlayers[data.id]
+    // Since the following 2 lines are atomic, it would make sense to
+    // make an object that does this as one operation
+    remotePlayers[data.id].destroy()
+    delete remotePlayers[data.id];
+
+    console.log("supposed to remove player now " + Object.keys(remotePlayers).length );
 };
