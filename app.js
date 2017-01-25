@@ -58,16 +58,18 @@ app.use(function(err, req, res, next) {
   });
 });
 
-var env = process.env.NODE_ENV || 'development';
+var env = process.env.SOCKET_IP || 'localhost';
 
-if (env == 'development') {
+if (env == 'localhost') {
   app.locals.URLs = {
     socketURL: 'http://localhost:8000',
   }
 } else {
   app.locals.URLs = {
-    socketURL: 'http://35.167.229.55:8000',
+    socketURL: 'http://' + process.env.SOCKET_IP + ':8000',
   }
 }
+
+console.log("Socket pointing to: " + app.locals.URLs['socketURL'])
 
 module.exports = app;

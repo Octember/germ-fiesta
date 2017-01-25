@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start-production": "NODE_ENV=production node ./bin/www & node socketServer.js",
-    "start": "NODE_ENV=development node ./bin/www & node socketServer.js"
+    "start-production": "SOCKET_IP=`curl checkip.amazonaws.com` node ./bin/www & node socketServer.js",
+    "start": "SOCKET_IP='localhost' node ./bin/www & node socketServer.js"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
