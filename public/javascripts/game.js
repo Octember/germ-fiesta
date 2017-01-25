@@ -9,17 +9,22 @@ var canvas,         // Canvas DOM element
     socket;         // socket.io reference
 
 
+
 /**************************************************
 ** GAME INITIALIZATION
 **************************************************/
 function init() {
     // Declare the canvas and rendering context
     canvas = document.getElementById("gameCanvas");
-    ctx = canvas.getContext("2d");
 
-    // Maximise the canvas
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Create an empty project and a view for the canvas:
+    paper.setup(canvas);
+
+    paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
+
+    paper.view.onFrame = function(event) {
+        update();
+    }
 
     // Initialise keyboard controls
     keys = new Keys();
@@ -27,11 +32,14 @@ function init() {
     // Calculate a random start position for the local player
     // The minus 5 (half a player size) stops the player being
     // placed right on the egde of the screen
-    var startX = Math.round(Math.random()*(canvas.width-5)),
-        startY = Math.round(Math.random()*(canvas.height-5));
+    var startX = Math.round(Math.random()*(paper.view.viewSize.width-5)),
+        startY = Math.round(Math.random()*(paper.view.viewSize.height-5));
 
     // Initialise the local player
-    localPlayer = new Player(startX, startY);
+    localPlayer = new Player(startX, startY, 'green');
+    // localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
+    // localPlayer.path.fillColor = 'green';
+    // localPlayer.path.selected = true;
 
     // No remote players to begin with? What about existing players..
     remotePlayers = {};
@@ -42,6 +50,9 @@ function init() {
 
     // Start listening for events
     setEventHandlers();
+
+    paper.view.draw();
+
 };
 
 
@@ -53,8 +64,6 @@ var setEventHandlers = function() {
     window.addEventListener("keydown", onKeydown, false);
     window.addEventListener("keyup", onKeyup, false);
 
-    // Window resize
-    window.addEventListener("resize", onResize, false);
 
     socket.on("connect", onSocketConnected);
     socket.on("disconnect", onSocketDisconnect);
@@ -77,25 +86,13 @@ function onKeyup(e) {
     };
 };
 
-// Browser window resize
-function onResize(e) {
-    // Maximise the canvas
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-};
-
 
 /**************************************************
 ** GAME ANIMATION LOOP
 **************************************************/
 function animate() {
     update();
-    draw();
-
-    // Request a new animation frame using Paul Irish's shim
-    window.requestAnimFrame(animate);
 };
-
 
 /**************************************************
 ** GAME UPDATE
@@ -103,28 +100,11 @@ function animate() {
 function update() {
     var updated = localPlayer.update(keys);
 
+    localPlayer.setPosition(localPlayer.getX(), localPlayer.getY())
+
     if (updated) {
-        console.log("I'm moving!!")
         socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
     }
-};
-
-
-/**************************************************
-** GAME DRAW
-**************************************************/
-function draw() {
-    // Wipe the canvas clean
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the local player
-    localPlayer.draw(ctx);
-
-    // Draw remote players
-    var id;
-    for (id in remotePlayers) {
-        remotePlayers[id].draw(ctx);
-    };
 };
 
 
@@ -137,31 +117,33 @@ function onSocketConnected() {
 function onSocketDisconnect() {
     console.log("Disconnected from socket server");
 
-
 };
 
-function onNewPlayer(data) {
-    console.log("New player connected: " + data.id);
 
-    var newPlayer = new Player(data.x, data.y);
+function onNewPlayer(data) {
+    // console.log("New player connected: " + data.id);
+
+    var newPlayer = new Player(data.x, data.y, 'black');
     newPlayer.id = data.id;
+
+
 
     remotePlayers[newPlayer.id] = newPlayer;
 };
 
 function onMovePlayer(data) {
-    console.log("Player moved: " + data.id);
+    // console.log("Player moved: " + data.id);
 
     var movedPlayer = remotePlayers[data.id];
 
     if (!movedPlayer) {
-        console.log("Player not found: " + this.id);
+        // Commenting this out because it's noisy, but this should never happen
+        // console.log("Player not found: " + this.id);
         return;
     };
 
     // We probably trust the server, right?
-    movedPlayer.setX(data.x);
-    movedPlayer.setY(data.y);
+    movedPlayer.setPosition(data.x, data.y);
 };
 
 function onRemovePlayer(data) {

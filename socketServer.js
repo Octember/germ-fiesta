@@ -81,19 +81,21 @@ function onMovePlayer(data) {
     movedPlayer.setX(data.x);
     movedPlayer.setY(data.y);
 
-    // Tell everyone that he moved, in real time
-    // this.broadcast.emit("move player", {id: movedPlayer.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
+    // Tell everyone that he moved in real time
+    // this.broadcast.emit("move player", {id: this.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
 };
 
 
 // Alternative to alerting constantly
 function notifyPlayersMoved() {
 
-    // Loop thru players and broadcast players positions
+    // Loop through players and broadcast their positions
     Object.keys(players).forEach(function(id) {
         var player = players[id];
-
-        io.sockets.emit('move player', {id: player.id, x: player.getX(), y: player.getY()});
+        // don't know why this would happen, but it does
+        if (player) {
+            io.sockets.emit('move player', {id: id, x: player.getX(), y: player.getY()});
+        }
     });
 
 }
