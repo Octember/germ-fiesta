@@ -1,9 +1,9 @@
 (function(exports) {
 
-    var Cell = function(startX, startY, size, paperPath) {
+    var Cell = function(startX, startY, radius, paperPath) {
         var x = startX,
             y = startY,
-            size = size,
+            radius = radius,
             id; // assigned manually
 
         var path;
@@ -20,8 +20,8 @@
             return y;
         };
 
-        var getSize = function() {
-            return size;
+        var getRadius = function() {
+            return radius;
         }
 
         var setX = function(newX) {
@@ -37,7 +37,7 @@
             getY: getY,
             setX: setX,
             setY: setY,
-            getSize: getSize,
+            getRadius: getRadius,
             id: id
         }
     };

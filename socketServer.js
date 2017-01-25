@@ -54,7 +54,7 @@ function onNewPlayer(data) {
     var i, cell;
     for (i = 0; i < cells.length; i++) {
         cell = cells[i];
-        this.emit("new cell", {x: cell.getX(), y: cell.getY(), size: cell.getSize()})
+        this.emit("new cell", {x: cell.getX(), y: cell.getY(), size: cell.getRadius()})
     }
 
     players[newPlayer.id] = newPlayer;
