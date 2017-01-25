@@ -6,6 +6,7 @@ var canvas,         // Canvas DOM element
     keys,           // Keyboard input
     localPlayer,    // Local player
     remotePlayers,  // Remote players
+    cells,          // Cells on the map
     socket;         // socket.io reference
 
 
@@ -33,10 +34,9 @@ function init() {
         startY = Math.round(Math.random()*(paper.view.viewSize.height-5));
 
     // Initialise the local player
-    localPlayer = new Player(startX, startY, 'green');
-
-    // Other players
+    localPlayer   = new Player(startX, startY, 'green');
     remotePlayers = {};
+    cells         = [];
 
     // Init the connection to socket.io
     socket = io.connect("http://" + document.location.hostname + ":8000");
@@ -55,9 +55,13 @@ function init() {
 var setEventHandlers = function() {
     socket.on("connect", onSocketConnected);
     socket.on("disconnect", onSocketDisconnect);
+
     socket.on("new player", onNewPlayer);
     socket.on("move player", onMovePlayer);
     socket.on("remove player", onRemovePlayer);
+
+    socket.on("new cell", onNewCell);
+
 };
 
 /**************************************************
@@ -128,3 +132,32 @@ function onRemovePlayer(data) {
 
     console.log("supposed to remove player now " + Object.keys(remotePlayers).length );
 };
+
+
+function onRemovePlayer(data) {
+    console.log("supposed to remove player now " + Object.keys(remotePlayers).length);
+    var removePlayer = remotePlayers[data.id]
+
+    if (!removePlayer) {
+        console.log("Player not found: " + data.id);
+        return;
+    };
+
+    // Since the following 2 lines are atomic, it would make sense to
+    // make an object that does this as one operation
+    remotePlayers[data.id].destroy()
+    delete remotePlayers[data.id];
+
+    console.log("supposed to remove player now " + Object.keys(remotePlayers).length );
+};
+
+
+function onNewCell(data) {
+
+    var path = new paper.Path.Circle(new paper.Point(data.x, data.y), data.size);
+    path.strokeColor = 'black';
+
+    var cell = new Cell.Cell(data.x, data.y, data.size, path);
+
+    cells.push(cell);
+}

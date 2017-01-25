@@ -1,12 +1,24 @@
 var util = require("util");
 var socketio = require("socket.io");
 var Player = require("./Player").Player;
+debugger;
+var Cell = require("./common/model/Cell").Cell;
 
 var io; // The reference to sockio, on port 8000. This is a socketio standard
 var players; // The players in the room
 
+var cells;
+
 function init() {
     players = {};
+
+    cells = []
+    var i;
+    for (i = 0; i < 3; i++) {
+        // Random-ish positions and sizes
+        var cell = new Cell(100 + (i * 100), 100 + (i * 100), 20 + (i * 20));
+        cells.push(cell);
+    }
 
     io = socketio(8000);
 
@@ -20,9 +32,53 @@ var setEventHandlers = function() {
 
 function onSocketConnection(client) {
     util.log("New player has connected: "+client.id);
-    client.on("disconnect", onClientDisconnect);
     client.on("new player", onNewPlayer);
     client.on("move player", onMovePlayer);
+    client.on("disconnect", onClientDisconnect);
+};
+
+function onNewPlayer(data) {
+    var newPlayer = new Player(data.x, data.y);
+    newPlayer.id = this.id;
+
+    // Tell existing players about new player
+    this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
+
+    // Tell new player about existing players
+    var playerId, existingPlayer;
+    for (playerId in players) {
+        existingPlayer = players[playerId];
+        this.emit("new player", {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
+    };
+
+    var i, cell;
+    for (i = 0; i < cells.length; i++) {
+        cell = cells[i];
+        this.emit("new cell", {x: cell.getX(), y: cell.getY(), size: cell.getSize()})
+    }
+
+    players[newPlayer.id] = newPlayer;
+};
+
+
+// TODO: queue up player moves per timeframe, execute them all (race conditions?)
+function onMovePlayer(data) {
+    var movedPlayer = players[this.id];
+
+    if (!movedPlayer) {
+        util.log("Player not found: " + this.id);
+        return;
+    };
+
+    // util.log("Player moved " + this.id);
+
+    // TODO: Do we trust the client?
+    // Could cheat by passing bogus data, also these should be sanitized
+    movedPlayer.setX(data.x);
+    movedPlayer.setY(data.y);
+
+    // Tell everyone that he moved in real time
+    // this.broadcast.emit("move player", {id: this.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
 };
 
 
@@ -46,44 +102,6 @@ function onClientDisconnect() {
     this.broadcast.emit("remove player", {id: this.id});
 };
 
-function onNewPlayer(data) {
-    var newPlayer = new Player(data.x, data.y);
-    newPlayer.id = this.id;
-
-    // Tell existing players about new player
-    this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
-
-    // Tell new player about existing players
-    var playerId, existingPlayer;
-    for (playerId in players) {
-        existingPlayer = players[playerId];
-        this.emit("new player", {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
-    };
-
-    players[newPlayer.id] = newPlayer;
-};
-
-// TODO: queue up player moves per timeframe, execute them all (race conditions?)
-function onMovePlayer(data) {
-    var movedPlayer = players[this.id];
-
-    if (!movedPlayer) {
-        util.log("Player not found: " + this.id);
-        return;
-    };
-
-    // util.log("Player moved " + this.id);
-
-    // TODO: Do we trust the client?
-    // Could cheat by passing bogus data, also these should be sanitized
-    movedPlayer.setX(data.x);
-    movedPlayer.setY(data.y);
-
-    // Tell everyone that he moved in real time
-    // this.broadcast.emit("move player", {id: this.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
-};
-
-
 // Alternative to alerting constantly
 function notifyPlayersMoved() {
 
@@ -99,5 +117,5 @@ function notifyPlayersMoved() {
 
 init();
 
-// every half second, update player positions
+// every (1000 / 30) ms, update player positions
 setInterval(notifyPlayersMoved, 1000 / 30);
