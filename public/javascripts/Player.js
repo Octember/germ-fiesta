@@ -3,13 +3,14 @@ const PLAYER_SIZE = 20;
 /**************************************************
 ** GAME PLAYER CLASS
 **************************************************/
-var Player = function(startX, startY) {
+var Player = function(startX, startY, color) {
     var x = startX,
         y = startY,
         id,
         moveAmount = 2;
 
-    var path; // used by paperJS to draw it... this doesn't belong here
+    var path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
+    path.fillColor = color;
 
     var update = function(keys) {
         var prevX = x,
@@ -50,6 +51,12 @@ var Player = function(startX, startY) {
         y = newY;
     };
 
+    var setPosition = function(newX, newY) {
+        setX(newX);
+        setY(newY);
+        path.setPosition([newX, newY]);
+    }
+
     var draw = function(ctx) {
         ctx.fillRect(x - (PLAYER_SIZE / 2), y - (PLAYER_SIZE / 2), PLAYER_SIZE, PLAYER_SIZE);
     };
@@ -61,6 +68,6 @@ var Player = function(startX, startY) {
         getY: getY,
         setX: setX,
         setY: setY,
-        path: path // yuck
+        setPosition: setPosition // yuck
     }
 };

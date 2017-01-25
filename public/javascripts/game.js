@@ -23,7 +23,6 @@ function init() {
     paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
 
     paper.view.onFrame = function(event) {
-        console.log("onFrame (new way!) called");
         update();
     }
 
@@ -37,10 +36,10 @@ function init() {
         startY = Math.round(Math.random()*(paper.view.viewSize.height-5));
 
     // Initialise the local player
-    localPlayer = new Player(startX, startY);
-    localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
-    localPlayer.path.fillColor = 'green';
-    localPlayer.path.selected = true;
+    localPlayer = new Player(startX, startY, 'green');
+    // localPlayer.path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
+    // localPlayer.path.fillColor = 'green';
+    // localPlayer.path.selected = true;
 
     // No remote players to begin with? What about existing players..
     remotePlayers = {};
@@ -101,7 +100,7 @@ function animate() {
 function update() {
     var updated = localPlayer.update(keys);
 
-    localPlayer.path.setPosition([localPlayer.getX(), localPlayer.getY()])
+    localPlayer.setPosition(localPlayer.getX(), localPlayer.getY())
 
     if (updated) {
         socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
@@ -124,11 +123,10 @@ function onSocketDisconnect() {
 function onNewPlayer(data) {
     // console.log("New player connected: " + data.id);
 
-    var newPlayer = new Player(data.x, data.y);
+    var newPlayer = new Player(data.x, data.y, 'black');
     newPlayer.id = data.id;
 
-    newPlayer.path = new paper.Path.Circle(new paper.Point(newPlayer.getX(), newPlayer.getY()), 30);
-    newPlayer.path.fillColor = 'black';
+
 
     remotePlayers[newPlayer.id] = newPlayer;
 };
@@ -145,11 +143,7 @@ function onMovePlayer(data) {
     };
 
     // We probably trust the server, right?
-    movedPlayer.setX(data.x);
-    movedPlayer.setY(data.y);
-
-    // Why doesn't this work?
-    movedPlayer.path.setPostion([data.x, data.y]);
+    movedPlayer.setPosition(data.x, data.y);
 };
 
 function onRemovePlayer(data) {
