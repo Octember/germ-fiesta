@@ -58,7 +58,7 @@ function onNewPlayer(data) {
     var i, cell;
     for (i = 0; i < cells.length; i++) {
         cell = cells[i];
-        this.emit("new cell", {x: cell.getX(), y: cell.getY(), radius: cell.getRadius(), size: 0})
+        this.emit("new cell", {id: cell.id, x: cell.getX(), y: cell.getY(), radius: cell.getRadius(), size: cell.getSize()})
     }
 
     players[newPlayer.id] = newPlayer;
@@ -107,9 +107,6 @@ function onClientDisconnect() {
 };
 
 
-
-
-
 // Alternative to alerting constantly
 function notifyPlayersMoved() {
 
@@ -144,4 +141,6 @@ function update() {
 init();
 
 // every (1000 / 30) ms, update player positions
-setInterval(update, 1000 / 30);
+setInterval(notifyPlayersMoved, 1000 / 30);
+// Every 500 ms, update cells
+setInterval(updateCells, 1000 / 2);

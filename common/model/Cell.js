@@ -1,6 +1,6 @@
 (function(exports) {
 
-    var Cell = function(id, startX, startY, radius, size, paperPath, textPath) {
+    var Cell = function(id, startX, startY, radius, size, paperPath, text) {
         var x = startX;
         var y = startY;
         var radius = radius;
@@ -19,8 +19,8 @@
             path = paperPath;
         }
 
-        if (textPath !== undefined) {
-            text = textPath;
+        if (text !== undefined) {
+            text = text;
         }
 
         var getX = function() {

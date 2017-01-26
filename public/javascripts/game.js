@@ -169,12 +169,18 @@ function createCell(data) {
         fontSize: 15
     });
 
-    return new Cell.Cell(data.id, data.x, data.y, data.radius, drawing, text);
+    return new Cell.Cell(data.id, data.x, data.y, data.radius, data.size, drawing, text);
 };
 
 
 function onUpdateCell(data) {
+    if (Object.keys(cells).length == 0) {
+        console.log("There are no cells!")
+        return;
+    }
+
     var cell = cells[data.id]
+    console.log("cell: " + cell);
 
     console.log("Updating size to " + data.size)
     if (cell) {
