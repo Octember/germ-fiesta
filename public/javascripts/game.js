@@ -34,7 +34,9 @@ function init() {
         startY = Math.round(Math.random()*(paper.view.viewSize.height-5));
 
     // Initialise the local player
-    localPlayer   = new Player(startX, startY, 'green');
+    var path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
+    path.fillColor = 'green';
+    localPlayer   = new Player.Player(startX, startY, path);
     remotePlayers = {};
     cells         = {};
 
@@ -61,17 +63,14 @@ var setEventHandlers = function() {
     socket.on("remove player", onRemovePlayer);
 
     socket.on("new cell", onNewCell);
-    socket.on("update cell", onUpdateCell)
-
+    socket.on("update cell", onUpdateCell);
 };
 
 /**************************************************
 ** GAME UPDATE
 **************************************************/
 function update() {
-    var updated = localPlayer.update(keys);
-
-    localPlayer.setPosition(localPlayer.getX(), localPlayer.getY())
+    var updated = moveLocalPlayer(keys);
 
     if (updated) {
         socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
@@ -94,7 +93,10 @@ function onSocketDisconnect() {
 function onNewPlayer(data) {
     // console.log("New player connected: " + data.id);
 
-    var newPlayer = new Player(data.x, data.y, 'black');
+    var path = new paper.Path.Circle(new paper.Point(data.x, data.y), 30);
+    path.fillColor = 'black';
+
+    var newPlayer = new Player.Player(data.x, data.y, path);
     newPlayer.id = data.id;
 
     remotePlayers[newPlayer.id] = newPlayer;
@@ -102,7 +104,7 @@ function onNewPlayer(data) {
 
 
 function onMovePlayer(data) {
-    // console.log("Player moved: " + data.id);
+    // console.log("Player moved: " + data.id);x
 
     var movedPlayer = remotePlayers[data.id];
 
@@ -116,6 +118,32 @@ function onMovePlayer(data) {
     movedPlayer.setPosition(data.x, data.y);
 };
 
+
+function moveLocalPlayer(keys) {
+    var newX, newX, prevY, newY;
+    prevX = newX = localPlayer.getX();
+    prevY = newY = localPlayer.getY();
+
+    // Up key takes priority over down
+    if (paper.Key.isDown('up') || paper.Key.isDown('w')) {
+        newY -= Player.PLAYER_MOVE_AMOUNT;
+    } else if (paper.Key.isDown('down') || paper.Key.isDown('s')) {
+        newY += Player.PLAYER_MOVE_AMOUNT;
+    };
+
+    // Left key takes priority over right
+    if (paper.Key.isDown('left') || paper.Key.isDown('a')) {
+        newX -= Player.PLAYER_MOVE_AMOUNT;
+    } else if (paper.Key.isDown('right') || paper.Key.isDown('d')) {
+        newX += Player.PLAYER_MOVE_AMOUNT;
+    };
+
+    // todo: fix diagonal movement bug
+
+    localPlayer.setPosition(newX, newY);
+
+    return prevX != newX || prevY != newY;
+}
 
 function onRemovePlayer(data) {
     console.log("supposed to remove player now " + Object.keys(remotePlayers).length);
@@ -180,9 +208,9 @@ function onUpdateCell(data) {
     }
 
     var cell = cells[data.id]
-    console.log("cell: " + cell);
+    // console.log("cell: " + cell);
 
-    console.log("Updating size to " + data.size)
+    // console.log("Updating size to " + data.size)
     if (cell) {
         cell.getText().content = data.size;
     }

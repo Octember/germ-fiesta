@@ -1,6 +1,6 @@
 var util = require("util");
 var socketio = require("socket.io");
-var Player = require("./Player").Player;
+var Player = require("./common/model/Player").Player;
 var Cell = require("./common/model/Cell").Cell;
 var guid = require("./utility").guid;
 

@@ -1,15 +1,20 @@
 (function(exports) {
 
-    var Cell = function(id, startX, startY, radius, size, paperPath, text) {
+    var Cell = function(id, startX, startY, radius, size, paperPath, text, playerOwner) {
         var x = startX;
         var y = startY;
         var radius = radius;
         var id = id;
 
-        var size = 0;
 
         var path;
         var text;
+
+        // -1 if no owner / "Neutral", the ID of the player who controls if not
+        var owner;
+
+        // Amounts of troops on the cell
+        var size = 0;
 
         if (size !== undefined) {
             size = size;
@@ -21,6 +26,12 @@
 
         if (text !== undefined) {
             text = text;
+        }
+
+        if (playerOwner !== undefined) {
+            owner = playerOwner;
+        } else {
+            owner = 0;
         }
 
         var getX = function() {
