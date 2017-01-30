@@ -188,13 +188,21 @@ function onNewCell(data) {
 
 function createCell(data) {
     var drawing = new paper.Path.Circle(new paper.Point(data.x, data.y), data.radius);
-    drawing.strokeColor = 'black';
+    drawing.strokeWidth =  2
+    if (data.owner === -1) {
+        drawing.strokeColor = 'black';
+        drawing.fillColor   = '#D3D3D3'
+    } else {
+        // red and red background
+        drawing.strokeColor = '#B81111'
+        drawing.fillColor   = '#F0CFCF'
+    }
 
     var text = new paper.PointText({
         point: drawing.position,
         content: data.size,
         justification: 'center',
-        fontSize: 15
+        fontSize: 25
     });
 
     return new Cell.Cell(data.id, data.x, data.y, data.radius, data.size, drawing, text);

@@ -31,7 +31,7 @@
         if (playerOwner !== undefined) {
             owner = playerOwner;
         } else {
-            owner = 0;
+            owner = -1;
         }
 
         var getX = function() {
@@ -54,6 +54,10 @@
             return text;
         }
 
+        var getOwner = function() {
+            return owner;
+        }
+
         var setX = function(newX) {
             x = newX;
         };
@@ -66,6 +70,9 @@
             size = newSize;
         };
 
+        var setOwner = function(newOwner) {
+            owner = newOwner;
+        }
 
         return {
             getX: getX,
@@ -76,7 +83,9 @@
             getRadius: getRadius,
             id: id,
             getText: getText,
-            setSize: setSize
+            setSize: setSize,
+            getOwner: getOwner,
+            setOwner: setOwner
         }
     };
 

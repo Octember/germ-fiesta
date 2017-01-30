@@ -15,10 +15,27 @@ function init() {
 
     cells = []
     var i;
+
+    // Some arbitrary cells
+    var cell = new Cell(guid(), 200, 200, 60);
+    cell.setOwner(10);
+    cells.push(cell);
+
+    cell = new Cell(guid(), 500, 250, 60);
+    cells.push(cell);
+
+    cell = new Cell(guid(), 450, 600, 80);
+    cells.push(cell);
+
+    cell = new Cell(guid(), 300, 280, 50);
+    cells.push(cell);
+
+    cell = new Cell(guid(), 550, 480, 60);
+    cells.push(cell);
+
+
     for (i = 0; i < 3; i++) {
         // Random-ish positions and sizes
-        var cell = new Cell(guid(), 100 + (i * 100), 100 + (i * 100), 20 + (i * 20));
-        cells.push(cell);
     }
 
     io = socketio(8000);
@@ -58,7 +75,14 @@ function onNewPlayer(data) {
     var i, cell;
     for (i = 0; i < cells.length; i++) {
         cell = cells[i];
-        this.emit("new cell", {id: cell.id, x: cell.getX(), y: cell.getY(), radius: cell.getRadius(), size: cell.getSize()})
+        this.emit("new cell", {
+            id:      cell.id,
+            x:       cell.getX(),
+            y:       cell.getY(),
+            radius:  cell.getRadius(),
+            size:    cell.getSize(),
+            owner:   cell.getOwner()
+        });
     }
 
     players[newPlayer.id] = newPlayer;
@@ -125,9 +149,19 @@ function updateCells() {
     var i = 0;
     for (i = 0; i < cells.length; i++) {
         var cell = cells[i];
-        cell.setSize(cell.getSize() + 1)
 
-        io.sockets.emit('update cell', {id: cell.id, size: cell.getSize()})
+        var updated = false;
+
+        if (cell.getOwner() !== -1) {
+            cell.setSize(cell.getSize() + 1);
+
+            updated = true;
+        }
+
+        // Only notify players if it actually updated
+        if (updated) {
+            io.sockets.emit('update cell', {id: cell.id, size: cell.getSize(), owner: cell.getOwner()})
+        }
     }
 
 }
@@ -143,4 +177,4 @@ init();
 // every (1000 / 30) ms, update player positions
 setInterval(notifyPlayersMoved, 1000 / 30);
 // Every 500 ms, update cells
-setInterval(updateCells, 1000 / 2);
+setInterval(updateCells, 1000 );
