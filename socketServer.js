@@ -13,30 +13,25 @@ var cells;
 function init() {
     players = {};
 
-    cells = []
+    cells = {}
     var i;
 
     // Some arbitrary cells
     var cell = new Cell(guid(), 200, 200, 60);
     cell.setOwner(10);
-    cells.push(cell);
+    cells[cell.id] = cell;
 
     cell = new Cell(guid(), 500, 250, 60);
-    cells.push(cell);
+    cells[cell.id] = cell;
 
     cell = new Cell(guid(), 450, 600, 80);
-    cells.push(cell);
+    cells[cell.id] = cell;
 
     cell = new Cell(guid(), 300, 280, 50);
-    cells.push(cell);
+    cells[cell.id] = cell;
 
     cell = new Cell(guid(), 550, 480, 60);
-    cells.push(cell);
-
-
-    for (i = 0; i < 3; i++) {
-        // Random-ish positions and sizes
-    }
+    cells[cell.id] = cell;
 
     io = socketio(8000);
 
@@ -51,9 +46,11 @@ var setEventHandlers = function() {
 
 function onSocketConnection(client) {
     util.log("New player has connected: "+client.id);
-    client.on("new player", onNewPlayer);
+    client.on("new player",  onNewPlayer);
     client.on("move player", onMovePlayer);
-    client.on("disconnect", onClientDisconnect);
+    client.on("disconnect",  onClientDisconnect);
+
+    client.on("claim cell",  onClaimCell);
 };
 
 
@@ -67,14 +64,14 @@ function onNewPlayer(data) {
     // Tell new player about existing players
     var playerId, existingPlayer;
     for (playerId in players) {
-        existingPlayer = players[playerId];
+        var existingPlayer = players[playerId];
         this.emit("new player", {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
     };
 
     // tell him about the cells
-    var i, cell;
-    for (i = 0; i < cells.length; i++) {
-        cell = cells[i];
+    var cellID;
+    for (cellID in cells) {
+        var cell = cells[cellID];
         this.emit("new cell", {
             id:      cell.id,
             x:       cell.getX(),
@@ -83,7 +80,7 @@ function onNewPlayer(data) {
             size:    cell.getSize(),
             owner:   cell.getOwner()
         });
-    }
+    };
 
     players[newPlayer.id] = newPlayer;
 };
@@ -120,15 +117,24 @@ function onClientDisconnect() {
         return;
     };
 
-    util.log("Client IDs: ");
-    util.log(Object.keys(players));
-
     delete players[this.id];
 
     util.log("Broadcasting 'remove player'")
 
     this.broadcast.emit("remove player", {id: this.id});
 };
+
+
+function onClaimCell(data) {
+    var cell = cells[data.id];
+
+    if (cell) {
+        cell.setOwner(this.id);
+    } else {
+        console.log("onClaimCell: No cell found!");
+    }
+}
+
 
 
 // Alternative to alerting constantly
@@ -147,8 +153,8 @@ function notifyPlayersMoved() {
 function updateCells() {
 
     var i = 0;
-    for (i = 0; i < cells.length; i++) {
-        var cell = cells[i];
+    Object.keys(cells).forEach(function(id) {
+        var cell = cells[id];
 
         var updated = false;
 
@@ -162,8 +168,7 @@ function updateCells() {
         if (updated) {
             io.sockets.emit('update cell', {id: cell.id, size: cell.getSize(), owner: cell.getOwner()})
         }
-    }
-
+    });
 }
 
 function update() {

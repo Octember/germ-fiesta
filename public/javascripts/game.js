@@ -187,8 +187,10 @@ function onNewCell(data) {
 
 
 function createCell(data) {
+    var cellID = data.id;
     var drawing = new paper.Path.Circle(new paper.Point(data.x, data.y), data.radius);
-    drawing.strokeWidth =  2
+    drawing.strokeWidth = 2
+
     if (data.owner === -1) {
         drawing.strokeColor = 'black';
         drawing.fillColor   = '#D3D3D3'
@@ -198,6 +200,18 @@ function createCell(data) {
         drawing.fillColor   = '#F0CFCF'
     }
 
+    drawing.onMouseDown = function(event) {
+        claimCell(cellID);
+    }
+
+    drawing.onMouseEnter = function(event) {
+        this.strokeWidth = 4;
+    }
+
+    drawing.onMouseLeave = function(event) {
+        this.strokeWidth = 2;
+    }
+
     var text = new paper.PointText({
         point: drawing.position,
         content: data.size,
@@ -205,7 +219,15 @@ function createCell(data) {
         fontSize: 25
     });
 
-    return new Cell.Cell(data.id, data.x, data.y, data.radius, data.size, drawing, text);
+    text.onMouseEnter = function(event) {
+        drawing.strokeWidth = 4;
+    }
+
+    text.onMouseLeave = function(event) {
+        drawing.strokeWidth = 2;
+    }
+
+    return new Cell.Cell(cellID, data.x, data.y, data.radius, data.size, drawing, text);
 };
 
 
@@ -216,10 +238,22 @@ function onUpdateCell(data) {
     }
 
     var cell = cells[data.id]
-    // console.log("cell: " + cell);
 
-    // console.log("Updating size to " + data.size)
     if (cell) {
         cell.getText().content = data.size;
+        cell.setOwner(data.owner);
+    }
+}
+
+
+
+function claimCell(cellID) {
+    var cell = cells[cellID];
+
+    if (cell) {
+        socket.emit("claim cell", {id: cellID});
+    } else {
+        console.log("ClaimCell: No cell found!");
+        return;
     }
 }
