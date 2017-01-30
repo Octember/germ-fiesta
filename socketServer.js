@@ -130,6 +130,7 @@ function onClaimCell(data) {
 
     if (cell) {
         cell.setOwner(this.id);
+        io.sockets.emit('update cell', {id: cell.id, size: cell.getSize(), owner: cell.getOwner()})
     } else {
         console.log("onClaimCell: No cell found!");
     }

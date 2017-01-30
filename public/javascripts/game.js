@@ -80,6 +80,8 @@ function update() {
 
 function onSocketConnected() {
     console.log("Connected to socket server");
+    // Make sure to set local player ID
+    localPlayer.id = this.id;
 
     socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY()});
 };
@@ -191,14 +193,24 @@ function createCell(data) {
     var drawing = new paper.Path.Circle(new paper.Point(data.x, data.y), data.radius);
     drawing.strokeWidth = 2
 
-    if (data.owner === -1) {
-        drawing.strokeColor = 'black';
-        drawing.fillColor   = '#D3D3D3'
-    } else {
-        // red and red background
-        drawing.strokeColor = '#B81111'
-        drawing.fillColor   = '#F0CFCF'
+    drawing.setOwner = function(ownerID) {
+        console.log("owner id: " + ownerID);
+        console.log("local player id: " + localPlayer.id);
+        if (ownerID === -1) {
+            // yellow for neutral
+            drawing.strokeColor = '#C8C65D';
+            drawing.fillColor   = '#FFFEBD'
+        } else if (ownerID === localPlayer.id) {
+            // blue for owner
+            drawing.strokeColor = '#27486D'
+            drawing.fillColor   = '#8195AA'
+        } else {
+            // red and red background
+            drawing.strokeColor = '#A73D32'
+            drawing.fillColor   = '#FFC3BD'
+        }
     }
+    drawing.setOwner(data.owner);
 
     drawing.onMouseDown = function(event) {
         claimCell(cellID);

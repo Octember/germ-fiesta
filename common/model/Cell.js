@@ -72,6 +72,10 @@
 
         var setOwner = function(newOwner) {
             owner = newOwner;
+
+            if (path) {
+                path.setOwner(newOwner);
+            }
         }
 
         return {
