@@ -73,7 +73,7 @@ function onNewPlayer(data) {
         owner:   newCell.getOwner()
     });
 
-    // tell him about the cells
+    // tell the new player about existing cells
     var cellID;
     for (cellID in cells) {
         var cell = cells[cellID];
@@ -88,6 +88,11 @@ function onNewPlayer(data) {
     };
 
     cells[newCell.id] = newCell;
+
+    var newPlayer = new Player(this.id);
+    newPlayer.cells.push(newCell.id);
+
+    players[this.id] = newPlayer;
 };
 
 
