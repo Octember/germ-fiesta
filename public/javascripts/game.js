@@ -11,7 +11,7 @@ var canvas,         // Canvas DOM element
 
 
 var cellGroup;
-var selectedCell;
+var selectedCellID;
 
 
 
@@ -29,6 +29,40 @@ function init() {
 
     paper.view.onFrame = function(event) {
         update();
+    }
+
+    paper.view.onMouseDown = function(event) {
+        var hit = cellGroup.hitTest(event.point);
+
+        // todo: clean this up
+        if (hit) {
+            var cell = hit.item.cellReference;
+            console.log("Mouse down on cell " + cell.id);
+
+            if (cell.isOwner(localPlayer.id)) {
+                selectedCellID = cell.id;
+            } else {
+                selectedCellID = undefined;
+            }
+        } else {
+            selectedCellID = undefined;
+        }
+    }
+
+    paper.view.onMouseUp = function(event) {
+
+        var hit = cellGroup.hitTest(event.point);
+
+        if (hit) {
+            var destinationCell = hit.item.cellReference;
+
+            if (selectedCellID && destinationCell.id !== selectedCellID && cells[selectedCellID].isOwner(localPlayer.id)) {
+                console.log("Mouse dragged, ended up on cell " + destinationCell.id);
+                claimCell(destinationCell.id);
+            }
+
+            selectedCellID = undefined;
+        }
     }
 
     // Initialise the local player
@@ -132,33 +166,21 @@ function createCell(data) {
     }
     drawing.setOwner(data.owner);
 
-    drawing.onMouseDown = function(event) {
-        console.log("Mouse down on cell " + cellID);
-
-        // claimCell(cellID);
-        selectedCell = cellID;
-    }
-
-    drawing.onMouseUp = function(event) {
-        // There is a paperJS issue documented on this, this is a workaround
-        // https://github.com/paperjs/paper.js/issues/1247
-        if (cellID !== selectedCell) {
-            console.log("Mouse dragged, ended up on cell " + cellID);
-            claimCell(cellID);
+    drawing.onMouseDrag = function(event) {
+        if (cells[cellID].isOwner(localPlayer.id)) {
+            console.log("mouse drag")
+            var line = new paper.Path();
+            line.strokeColor = 'black';
+            line.add(drawing.position);
+            line.add(event.point);
+            line.removeOn({
+                drag: true,
+                up: true
+            });
+            line.insertBelow(cellGroup);
         }
     }
 
-    drawing.onMouseDrag = function(event) {
-        var line = new paper.Path();
-        line.strokeColor = 'black';
-        line.add(drawing.position);
-        line.add(event.point);
-        line.removeOn({
-            drag: true,
-            up: true
-        });
-        line.insertBelow(cellGroup);
-    }
 
     var text = new paper.PointText({
         point: drawing.position,
@@ -169,15 +191,17 @@ function createCell(data) {
 
     // Style stuff for when the user hovers over cells
     drawing.onMouseEnter = function(event) {
-        this.strokeWidth = 4;
+        drawing.strokeWidth = 4;
     }
 
     drawing.onMouseLeave = function(event) {
-        this.strokeWidth = 2;
+        drawing.strokeWidth = 2;
     }
 
     text.onMouseEnter = drawing.onMouseEnter;
     text.onMouseLeave = drawing.onMouseLeave;
+    text.onMouseDown  = drawing.onMouseDown;
+    text.onMouseDrag  = drawing.onMouseDrag;
     text.onMouseUp    = drawing.onMouseUp;
 
     // Not sure if we want this
@@ -185,7 +209,11 @@ function createCell(data) {
 
     cellGroup.addChild(drawing);
 
-    return new Cell.Cell(cellID, data.x, data.y, data.radius, data.size, drawing, text);
+    var cell = Cell.Cell(cellID, data.x, data.y, data.radius, data.size, drawing, text);
+
+    drawing.cellReference = cell;
+
+    return cell;
 };
 
 

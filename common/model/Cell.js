@@ -1,11 +1,10 @@
 (function(exports) {
 
     var Cell = function(id, startX, startY, radius, size, paperPath, text, playerOwner) {
-        var x = startX;
-        var y = startY;
+        var x      = startX;
+        var y      = startY;
         var radius = radius;
-        var id = id;
-
+        var id     = id;
 
         var path;
         var text;
@@ -26,6 +25,9 @@
 
         if (text !== undefined) {
             text = text;
+            text.getCell = function() {
+                return this;
+            }
         }
 
         if (playerOwner !== undefined) {
@@ -34,43 +36,47 @@
             owner = -1;
         }
 
-        var getX = function() {
+        function getX() {
             return x;
         };
 
-        var getY = function() {
+        function getY() {
             return y;
         };
 
-        var getRadius = function() {
+        function getRadius() {
             return radius;
         }
 
-        var getSize = function() {
+        function getSize() {
             return size;
         }
 
-        var getText = function() {
+        function getText() {
             return text;
         }
 
-        var getOwner = function() {
+        function getOwner() {
             return owner;
         }
 
-        var setX = function(newX) {
+        function isOwner(id) {
+            return owner === id;
+        }
+
+        function setX(newX) {
             x = newX;
         };
 
-        var setY = function(newY) {
+        function setY(newY) {
             y = newY;
         };
 
-        var setSize = function(newSize) {
+        function setSize(newSize) {
             size = newSize;
         };
 
-        var setOwner = function(newOwner) {
+        function setOwner(newOwner) {
             owner = newOwner;
 
             if (path) {
@@ -85,11 +91,13 @@
             setY: setY,
             getSize: getSize,
             getRadius: getRadius,
-            id: id,
-            getText: getText,
-            setSize: setSize,
+            id:       id,
+            getText:  getText,
+            setSize:  setSize,
             getOwner: getOwner,
-            setOwner: setOwner
+            setOwner: setOwner,
+            isOwner:  isOwner,
+            paperPath: path
         }
     };
 
