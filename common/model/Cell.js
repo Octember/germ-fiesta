@@ -13,10 +13,12 @@
         var owner;
 
         // Amounts of troops on the cell
-        var size = 0;
+        var size;
 
         if (size !== undefined) {
             size = size;
+        } else {
+            size = 0;
         }
 
         if (paperPath !== undefined) {

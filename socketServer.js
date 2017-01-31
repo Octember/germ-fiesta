@@ -17,20 +17,20 @@ function init() {
     var i;
 
     // Some arbitrary cells
-    var cell = new Cell(guid(), 200, 200, 60);
+    var cell = new Cell(guid(), 200, 200, 30);
     cell.setOwner(10);
     cells[cell.id] = cell;
 
-    cell = new Cell(guid(), 500, 250, 60);
+    cell = new Cell(guid(), 800, 250, 40, 5);
     cells[cell.id] = cell;
 
-    cell = new Cell(guid(), 450, 600, 80);
+    cell = new Cell(guid(), 450, 600, 50, 5);
     cells[cell.id] = cell;
 
-    cell = new Cell(guid(), 300, 280, 50);
+    cell = new Cell(guid(), 300, 280, 40, 5);
     cells[cell.id] = cell;
 
-    cell = new Cell(guid(), 550, 480, 60);
+    cell = new Cell(guid(), 550, 480, 60, 5);
     cells[cell.id] = cell;
 
     io = socketio(8000);
@@ -50,6 +50,7 @@ function onSocketConnection(client) {
     client.on("disconnect",  onClientDisconnect);
 
     client.on("claim cell",  onClaimCell);
+    client.on("attack cell", onAttackCell);
 };
 
 
@@ -119,12 +120,57 @@ function onClaimCell(data) {
 
     if (cell) {
         cell.setOwner(this.id);
-        io.sockets.emit('update cell', {id: cell.id, size: cell.getSize(), owner: cell.getOwner()})
+        broadcastUpdatedCell(cell);
     } else {
         console.log("onClaimCell: No cell found!");
     }
 }
 
+
+function onAttackCell(data) {
+    var fromCell = cells[data.from];
+    var toCell   = cells[data.to];
+
+    // In the future this should be delayed, not immediate.
+    if (fromCell && toCell) {
+        attackCell(fromCell, toCell);
+        broadcastUpdatedCell(fromCell);
+        broadcastUpdatedCell(toCell);
+    } else {
+        console.log("onAttackCell: Cells not found!")
+    }
+}
+
+function attackCell(attacker, defender) {
+
+    var numTroops = Math.floor(attacker.getSize() / 2);
+
+    attacker.setSize(attacker.getSize() - numTroops);
+
+    // Are the troops of the same owner? Battle if not
+    if (attacker.getOwner() === defender.getOwner()) {
+        defender.setSize(defender.getSize() + numTroops);
+    } else {
+        // Any custom defense / attack logic could be put in here
+        var remainingTroops = defender.getSize() - numTroops;
+
+        if (remainingTroops < 0) {
+            defender.setOwner(attacker.getOwner());
+            defender.setSize(-remainingTroops);
+        } else {
+            defender.setSize(remainingTroops);
+        }
+    }
+
+}
+
+function broadcastUpdatedCell(cell) {
+    io.sockets.emit('update cell', {
+        id: cell.id,
+        size: cell.getSize(),
+        owner: cell.getOwner()
+    });
+}
 
 function updateCells() {
 
@@ -142,7 +188,7 @@ function updateCells() {
 
         // Only notify players if it actually updated
         if (updated) {
-            io.sockets.emit('update cell', {id: cell.id, size: cell.getSize(), owner: cell.getOwner()})
+            broadcastUpdatedCell(cell);
         }
     });
 }

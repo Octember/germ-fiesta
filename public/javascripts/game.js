@@ -58,7 +58,8 @@ function init() {
 
             if (selectedCellID && destinationCell.id !== selectedCellID && cells[selectedCellID].isOwner(localPlayer.id)) {
                 console.log("Mouse dragged, ended up on cell " + destinationCell.id);
-                claimCell(destinationCell.id);
+                // claimCell(destinationCell.id);
+                attackCell(selectedCellID, destinationCell.id);
             }
 
             selectedCellID = undefined;
@@ -239,6 +240,19 @@ function claimCell(cellID) {
         socket.emit("claim cell", {id: cellID});
     } else {
         console.log("ClaimCell: No cell found!");
+        return;
+    }
+}
+
+
+function attackCell(fromID, toID) {
+    var cell1 = cells[fromID];
+    var cell2 = cells[toID];
+
+    if (cell1 && cell2) {
+        socket.emit("attack cell", {from: fromID, to: toID});
+    } else {
+        console.log("attackCell: cell not found!");
         return;
     }
 }
