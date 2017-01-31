@@ -47,7 +47,6 @@ var setEventHandlers = function() {
 function onSocketConnection(client) {
     util.log("New player has connected: "+client.id);
     client.on("new player",  onNewPlayer);
-    client.on("move player", onMovePlayer);
     client.on("disconnect",  onClientDisconnect);
 
     client.on("claim cell",  onClaimCell);
@@ -55,18 +54,24 @@ function onSocketConnection(client) {
 
 
 function onNewPlayer(data) {
-    var newPlayer = new Player(data.x, data.y);
-    newPlayer.id = this.id;
+    // Calculate a random start position for the local player
+    // The minus 5 (half a player size) stops the player being
+    // placed right on the egde of the screen
+    var startX = 30 + Math.round(Math.random()*(500 - 60)),
+        startY = 30 + Math.round(Math.random()*(500 - 60));
 
-    // Tell existing players about new player
-    this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
+    var newCell =  new Cell(guid(), startX, startY, 60);
+    newCell.setOwner(this.id);
 
-    // Tell new player about existing players
-    var playerId, existingPlayer;
-    for (playerId in players) {
-        var existingPlayer = players[playerId];
-        this.emit("new player", {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
-    };
+    // Tell all players about new player, including the player who just connected!
+    this.emit("new cell", {
+        id:      newCell.id,
+        x:       newCell.getX(),
+        y:       newCell.getY(),
+        radius:  newCell.getRadius(),
+        size:    newCell.getSize(),
+        owner:   newCell.getOwner()
+    });
 
     // tell him about the cells
     var cellID;
@@ -82,28 +87,7 @@ function onNewPlayer(data) {
         });
     };
 
-    players[newPlayer.id] = newPlayer;
-};
-
-
-// TODO: queue up player moves per timeframe, execute them all (race conditions?)
-function onMovePlayer(data) {
-    var movedPlayer = players[this.id];
-
-    if (!movedPlayer) {
-        util.log("Player not found: " + this.id);
-        return;
-    };
-
-    // util.log("Player moved " + this.id);
-
-    // TODO: Do we trust the client?
-    // Could cheat by passing bogus data, also these should be sanitized
-    movedPlayer.setX(data.x);
-    movedPlayer.setY(data.y);
-
-    // Tell everyone that he moved in real time
-    // this.broadcast.emit("move player", {id: this.id, x: movedPlayer.getX(), y: movedPlayer.getY()});
+    cells[newCell.id] = newCell;
 };
 
 
@@ -137,20 +121,6 @@ function onClaimCell(data) {
 }
 
 
-
-// Alternative to alerting constantly
-function notifyPlayersMoved() {
-
-    // Loop through players and broadcast their positions
-    Object.keys(players).forEach(function(id) {
-        var player = players[id];
-        // don't know why this would happen, but it does
-        if (player) {
-            io.sockets.emit('move player', {id: id, x: player.getX(), y: player.getY()});
-        }
-    });
-}
-
 function updateCells() {
 
     var i = 0;
@@ -172,15 +142,7 @@ function updateCells() {
     });
 }
 
-function update() {
-    notifyPlayersMoved();
-
-    updateCells();
-}
-
 init();
 
-// every (1000 / 30) ms, update player positions
-setInterval(notifyPlayersMoved, 1000 / 30);
 // Every 500 ms, update cells
 setInterval(updateCells, 1000 );

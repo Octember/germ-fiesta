@@ -27,16 +27,10 @@ function init() {
         update();
     }
 
-    // Calculate a random start position for the local player
-    // The minus 5 (half a player size) stops the player being
-    // placed right on the egde of the screen
-    var startX = Math.round(Math.random()*(paper.view.viewSize.width-5)),
-        startY = Math.round(Math.random()*(paper.view.viewSize.height-5));
-
     // Initialise the local player
-    var path = new paper.Path.Circle(new paper.Point(startX, startY), 30);
-    path.fillColor = 'green';
-    localPlayer   = new Player.Player(startX, startY, path);
+    var path = undefined;//new paper.Path.Circle(new paper.Point(startX, startY), 30);
+    // path.fillColor = 'green';
+    localPlayer   = new Player.Player();
     remotePlayers = {};
     cells         = {};
 
@@ -58,10 +52,6 @@ var setEventHandlers = function() {
     socket.on("connect", onSocketConnected);
     socket.on("disconnect", onSocketDisconnect);
 
-    socket.on("new player", onNewPlayer);
-    socket.on("move player", onMovePlayer);
-    socket.on("remove player", onRemovePlayer);
-
     socket.on("new cell", onNewCell);
     socket.on("update cell", onUpdateCell);
 };
@@ -70,11 +60,8 @@ var setEventHandlers = function() {
 ** GAME UPDATE
 **************************************************/
 function update() {
-    var updated = moveLocalPlayer(keys);
 
-    if (updated) {
-        socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
-    }
+    // socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
 };
 
 
@@ -83,7 +70,7 @@ function onSocketConnected() {
     // Make sure to set local player ID
     localPlayer.id = this.id;
 
-    socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY()});
+    socket.emit("new player");
 };
 
 
@@ -91,78 +78,6 @@ function onSocketDisconnect() {
     console.log("Disconnected from socket server");
 };
 
-
-function onNewPlayer(data) {
-    // console.log("New player connected: " + data.id);
-
-    var path = new paper.Path.Circle(new paper.Point(data.x, data.y), 30);
-    path.fillColor = 'black';
-
-    var newPlayer = new Player.Player(data.x, data.y, path);
-    newPlayer.id = data.id;
-
-    remotePlayers[newPlayer.id] = newPlayer;
-};
-
-
-function onMovePlayer(data) {
-    // console.log("Player moved: " + data.id);x
-
-    var movedPlayer = remotePlayers[data.id];
-
-    if (!movedPlayer) {
-        // Commenting this out because it's noisy, but this should never happen
-        // console.log("Player not found: " + this.id);
-        return;
-    };
-
-    // We probably trust the server, right?
-    movedPlayer.setPosition(data.x, data.y);
-};
-
-
-function moveLocalPlayer(keys) {
-    var newX, newX, prevY, newY;
-    prevX = newX = localPlayer.getX();
-    prevY = newY = localPlayer.getY();
-
-    // Up key takes priority over down
-    if (paper.Key.isDown('up') || paper.Key.isDown('w')) {
-        newY -= Player.PLAYER_MOVE_AMOUNT;
-    } else if (paper.Key.isDown('down') || paper.Key.isDown('s')) {
-        newY += Player.PLAYER_MOVE_AMOUNT;
-    };
-
-    // Left key takes priority over right
-    if (paper.Key.isDown('left') || paper.Key.isDown('a')) {
-        newX -= Player.PLAYER_MOVE_AMOUNT;
-    } else if (paper.Key.isDown('right') || paper.Key.isDown('d')) {
-        newX += Player.PLAYER_MOVE_AMOUNT;
-    };
-
-    // todo: fix diagonal movement bug
-
-    localPlayer.setPosition(newX, newY);
-
-    return prevX != newX || prevY != newY;
-}
-
-function onRemovePlayer(data) {
-    console.log("supposed to remove player now " + Object.keys(remotePlayers).length);
-    var removePlayer = remotePlayers[data.id]
-
-    if (!removePlayer) {
-        console.log("Player not found: " + data.id);
-        return;
-    };
-
-    // Since the following 2 lines are atomic, it would make sense to
-    // make an object that does this as one operation
-    remotePlayers[data.id].destroy()
-    delete remotePlayers[data.id];
-
-    console.log("supposed to remove player now " + Object.keys(remotePlayers).length );
-};
 
 
 function onRemovePlayer(data) {
@@ -194,8 +109,6 @@ function createCell(data) {
     drawing.strokeWidth = 2
 
     drawing.setOwner = function(ownerID) {
-        console.log("owner id: " + ownerID);
-        console.log("local player id: " + localPlayer.id);
         if (ownerID === -1) {
             // yellow for neutral
             drawing.strokeColor = '#C8C65D';
@@ -256,7 +169,6 @@ function onUpdateCell(data) {
         cell.setOwner(data.owner);
     }
 }
-
 
 
 function claimCell(cellID) {

@@ -1,50 +1,18 @@
 (function(exports) {
 
-    var Player = function(startX, startY, path) {
-        var x = startX,
-            y = startY,
-            id;
+    var Player = function(id) {
+        var cells = [];
+        var id;
 
-        var path;
-
-        if (path !== undefined) {
-            path = path;
-        }
-
-        var getX = function() {
-            return x;
-        };
-
-        var getY = function() {
-            return y;
-        };
-
-        var setX = function(newX) {
-            x = newX;
-        };
-
-        var setY = function(newY) {
-            y = newY;
-        };
-
-        var setPosition = function(newX, newY) {
-            x = newX;
-            y = newY;
-            if (path) {
-                path.setPosition([newX, newY]);
-            }
+        if (id !== undefined) {
+            id = id;
         }
 
         return {
-            getX: getX,
-            getY: getY,
-            setX: setX,
-            setY: setY,
-            id: id,
-            setPosition: setPosition
+            cells: cells,
+            id:    id
         }
     };
 
     exports.Player = Player;
-    exports.PLAYER_MOVE_AMOUNT = 2;
 })(typeof exports === 'undefined' ? this['Player'] = {} : exports);
