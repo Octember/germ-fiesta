@@ -10,6 +10,10 @@ var canvas,         // Canvas DOM element
     socket;         // socket.io reference
 
 
+var cellGroup;
+var selectedCell;
+
+
 
 /**************************************************
 ** GAME INITIALIZATION
@@ -39,6 +43,9 @@ function init() {
 
     // Start listening for events
     setEventHandlers();
+
+    // Init paperJS project heirarchy
+    cellGroup = new paper.Group();
 
     paper.view.draw();
 
@@ -126,15 +133,31 @@ function createCell(data) {
     drawing.setOwner(data.owner);
 
     drawing.onMouseDown = function(event) {
-        claimCell(cellID);
+        console.log("Mouse down on cell " + cellID);
+
+        // claimCell(cellID);
+        selectedCell = cellID;
     }
 
-    drawing.onMouseEnter = function(event) {
-        this.strokeWidth = 4;
+    drawing.onMouseUp = function(event) {
+        // There is a paperJS issue documented on this, this is a workaround
+        // https://github.com/paperjs/paper.js/issues/1247
+        if (cellID !== selectedCell) {
+            console.log("Mouse dragged, ended up on cell " + cellID);
+            claimCell(cellID);
+        }
     }
 
-    drawing.onMouseLeave = function(event) {
-        this.strokeWidth = 2;
+    drawing.onMouseDrag = function(event) {
+        var line = new paper.Path();
+        line.strokeColor = 'black';
+        line.add(drawing.position);
+        line.add(event.point);
+        line.removeOn({
+            drag: true,
+            up: true
+        });
+        line.insertBelow(cellGroup);
     }
 
     var text = new paper.PointText({
@@ -144,13 +167,23 @@ function createCell(data) {
         fontSize: 25
     });
 
-    text.onMouseEnter = function(event) {
-        drawing.strokeWidth = 4;
+    // Style stuff for when the user hovers over cells
+    drawing.onMouseEnter = function(event) {
+        this.strokeWidth = 4;
     }
 
-    text.onMouseLeave = function(event) {
-        drawing.strokeWidth = 2;
+    drawing.onMouseLeave = function(event) {
+        this.strokeWidth = 2;
     }
+
+    text.onMouseEnter = drawing.onMouseEnter;
+    text.onMouseLeave = drawing.onMouseLeave;
+    text.onMouseUp    = drawing.onMouseUp;
+
+    // Not sure if we want this
+    drawing.addChild(text);
+
+    cellGroup.addChild(drawing);
 
     return new Cell.Cell(cellID, data.x, data.y, data.radius, data.size, drawing, text);
 };
